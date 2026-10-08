@@ -1,0 +1,8 @@
+[project]
+name = "heroloader"
+version = "0.1.0"
+description = "Mod loader for Keyboard Warrior"
+requires-python = ">=3.13"
+dependencies = [
+    "frida==17.23.0",
+]
