@@ -1,25 +1,32 @@
-"""Start Keyboard Warrior with hero_tab.js injected. Keep this running while you play."""
+"""Start Keyboard Warrior with HeroLoader injected. Keep this running while you play."""
 import os
 import pathlib
 import threading
 
 import frida
 
+import lexicon
+
 HERE = pathlib.Path(__file__).resolve().parent
 GAME = HERE.parent / 'keyboardwarrior.exe'
-SETTINGS = pathlib.Path(os.environ['APPDATA']) / 'heroloader' / 'settings.json'
+DATA = pathlib.Path(os.environ['APPDATA']) / 'heroloader'
+SETTINGS = DATA / 'settings.json'
+DICTIONARIES = DATA / 'dictionaries'
+SCRIPTS = ['hero_tab.js', 'lexicon.js']  # mods come after hero_tab.js, whose helpers they share
 
 
 def main():
-    SETTINGS.parent.mkdir(exist_ok=True)
+    DICTIONARIES.mkdir(parents=True, exist_ok=True)
     pid = frida.spawn([str(GAME)], cwd=str(GAME.parent))
     try:
         session = frida.attach(pid)
-        script = session.create_script((HERE / 'hero_tab.js').read_text(encoding='utf-8'))
+        source = '\n'.join((HERE / name).read_text(encoding='utf-8') for name in SCRIPTS)
+        script = session.create_script(source)
         script.on('message', lambda message, data: print(message.get('stack') or message, flush=True))
         script.load()
         saved = SETTINGS.read_text(encoding='utf-8') if SETTINGS.exists() else '{}'
         script.exports_sync.init(str(SETTINGS), saved)
+        script.exports_sync.lexicon(lexicon.load(DICTIONARIES))
     except Exception:
         frida.kill(pid)
         raise
