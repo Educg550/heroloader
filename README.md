@@ -29,3 +29,13 @@ janela
 - Words may only use letters from the alphabet, may not repeat, and may have at most 8 letters. The game only accepts the letters a to z.
 - Any word lengths are fine. The game splits its phrases so that each one gets a word of a length your dictionary has.
 - A file with a mistake shows up in red in the mod window with the reason. If your chosen dictionary is missing or broken, the song list won't start a song until you choose another.
+
+## Project layout and tests
+
+`heroloader.py` and `hero_tab.js` implement the loader. Each mod lives in its own folder under `mods/`; Lexicon's Python parser and injected JavaScript are in `mods/lexicon/`. Tests live in `tests/`.
+
+Run the tests from the project root:
+
+```
+uv run python -m unittest discover -v
+```

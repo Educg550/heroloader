@@ -5,14 +5,14 @@ import threading
 
 import frida
 
-import lexicon
+from mods import lexicon
 
 HERE = pathlib.Path(__file__).resolve().parent
 GAME = HERE.parent / 'keyboardwarrior.exe'
 DATA = pathlib.Path(os.environ['APPDATA']) / 'heroloader'
 SETTINGS = DATA / 'settings.json'
 DICTIONARIES = DATA / 'dictionaries'
-SCRIPTS = ['hero_tab.js', 'lexicon.js']  # mods come after hero_tab.js, whose helpers they share
+SCRIPTS = ['hero_tab.js', 'mods/lexicon/lexicon.js']  # mods come after hero_tab.js, whose helpers they share
 
 
 def main():

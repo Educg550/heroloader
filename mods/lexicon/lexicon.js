@@ -1,4 +1,4 @@
-// Lexicon: the game draws its words from a player-supplied dictionary (file format in lexicon.py).
+// Lexicon: the game draws its words from a player-supplied dictionary (file format in __init__.py).
 // Appended after hero_tab.js, whose helpers (at, settings, save, registerMod) it uses.
 
 // The WORDS modes read the vocabulary only through this table: one { &[&str], count } per word length 1-8.

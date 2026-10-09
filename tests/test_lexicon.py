@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import lexicon
+from mods import lexicon
 
 
 class ParseTest(unittest.TestCase):
