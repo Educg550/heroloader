@@ -54,7 +54,12 @@ rpc.exports.init = (path, saved) => {
   keyText = text(settings.modWindowKey.name);
   setLigaturesRemoved(settings.removeLigatures);
 };
-const save = () => File.writeAllText(settingsPath, JSON.stringify(settings, null, 2));
+const save = () => {
+  // Frida 17.23.0 writeAllText leaves stale bytes when the new JSON is shorter.
+  const file = new File(settingsPath, 'w');
+  try { file.write(JSON.stringify(settings, null, 2)); }
+  finally { file.close(); }
+};
 
 // Mods appended after this file register here to appear in the mod window. Provisional until the
 // mod format is decided. A mod is { name, description, rows: [{ label, value(), change(step) }],
