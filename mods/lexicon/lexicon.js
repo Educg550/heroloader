@@ -5,30 +5,39 @@
 const VOCABULARY = at(0x140548460);
 Memory.protect(VOCABULARY, 8 * 16, 'rw-');
 const gameVocabulary = [...Array(8).keys()].map(i => [VOCABULARY.add(16 * i).readPointer(), VOCABULARY.add(16 * i + 8).readU64()]);
-const lexiconMemory = []; // kept for the whole session: the game may still hold pointers into old dictionaries
+const dictionaryVocabulary = new Map(); // kept for the whole session: the game may still hold old pointers
 
 let dictionaries = [], active = null; // active: the dictionary in use, null for the game's own words
 function useDictionary(dictionary) {
-  active = dictionary;
-  for (let i = 0; i < 8; i++) {
-    let [array, count] = gameVocabulary[i];
-    if (dictionary) {
+  let vocabulary = dictionary ? dictionaryVocabulary.get(dictionary) : gameVocabulary;
+  if (!vocabulary) {
+    vocabulary = Array.from({ length: 8 }, (_, i) => {
       // Every length must have a word or the game crashes. Phrases are split so that only lengths with
       // words are asked for. ponytail: practice-section fragments in WORDS mode could still show this filler.
       const words = dictionary.words[i + 1].length ? dictionary.words[i + 1] : [dictionary.words[1][0].repeat(i + 1)];
-      array = Memory.alloc(16 * words.length);
-      words.forEach((word, j) => {
-        const string = Memory.allocUtf8String(word);
-        lexiconMemory.push(string);
-        array.add(16 * j).writePointer(string);
-        array.add(16 * j + 8).writeU64(word.length);
-      });
-      lexiconMemory.push(array);
-      count = words.length;
-    }
+      const count = words.length, length = i + 1;
+      const array = Memory.alloc(count * (16 + length) + 1);
+      const strings = array.add(16 * count);
+      strings.writeUtf8String(words.join(''));
+      // Pack the Rust &str table in JS, then copy it in one native write.
+      const table = new ArrayBuffer(16 * count), view = new DataView(table);
+      let address = BigInt(strings.toString());
+      const size = BigInt(length);
+      for (let j = 0; j < count; j++, address += size) {
+        view.setBigUint64(16 * j, address, true);
+        view.setBigUint64(16 * j + 8, size, true);
+      }
+      array.writeByteArray(table);
+      return [array, count];
+    });
+    dictionaryVocabulary.set(dictionary, vocabulary);
+  }
+  for (let i = 0; i < 8; i++) {
+    const [array, count] = vocabulary[i];
     VOCABULARY.add(16 * i).writePointer(array);
     VOCABULARY.add(16 * i + 8).writeU64(count);
   }
+  active = dictionary;
 }
 
 const usable = () => [null, ...dictionaries.filter(d => d.words)];
