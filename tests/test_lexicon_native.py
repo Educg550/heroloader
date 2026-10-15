@@ -43,10 +43,10 @@ rpc.exports.select = index => {
   return { words, addresses, cached: dictionaryVocabulary.size, active: active?.name ?? null };
 };
 '''
-        full = lexicon.parse('alphabet: [a-z]\nwords:\n' + '\n'.join(
+        full = lexicon.parse('[a-z]\n' + '\n'.join('abcdefghijklmnopqrstuvwxyz') + '\n' + '\n'.join(
             word[:length] for length in range(2, 9) for word in ['abcdefgh', 'zyxwvuts']
         ))
-        sparse = lexicon.parse('alphabet: [xy]\nwords:\nxy\nyx\n')
+        sparse = lexicon.parse('[xy]\nxy\nyx\n')
         child = subprocess.Popen(
             [sys.executable, '-c', 'import time; time.sleep(60)'],
             creationflags=subprocess.CREATE_NO_WINDOW,
@@ -57,7 +57,8 @@ rpc.exports.select = index => {
             script = session.create_script(setup + vocabulary_code + probe)
             script.load()
             script.exports_sync.setup([
-                {'name': 'full', 'words': full}, {'name': 'sparse', 'words': sparse},
+                {'name': 'full', 'alphabet': 'abcdefghijklmnopqrstuvwxyz', 'words': full},
+                {'name': 'sparse', 'alphabet': 'xy', 'words': sparse},
             ])
             builtin = script.exports_sync.select(-1)
             self.assertEqual(builtin['words'], {str(n): ['g' * n] for n in range(1, 9)})

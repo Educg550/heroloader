@@ -17,17 +17,19 @@ Keep the terminal open while you play.
 Lexicon makes the game use words from a dictionary you write. Save a `.txt` file in `%APPDATA%\heroloader\dictionaries`, restart through `heroloader.py`, and choose it in the mod window. The file name is the dictionary's name.
 
 ```
-alphabet: [a-z]
-words:
-casa
-gato
-janela
+[a-z]
+a
+house
+cat
+window
 ```
 
-- The first line is the alphabet: one bracketed class of letters and ranges, such as `[a-z]` or `[aeiouprst]`. Every letter in it also counts as a one-letter word.
-- The second line is `words:`. Then write one word per line.
+- The first line is the alphabet: one bracketed class of letters and ranges, such as `[a-z]` or `[aeiouprst]`. The alphabet defines allowed characters; it does not add words to the list.
+- After the alphabet, write one word per line. Blank lines are ignored.
 - Words may only use letters from the alphabet, may not repeat, and may have at most 8 letters. The game only accepts the letters a to z.
-- Any word lengths are fine. The game splits its phrases so that each one gets a word of a length your dictionary has.
+- **Strict mode is ON by default:** only listed words are available, including single-letter words. Words may repeat during play. Lexicon splits phrases into whole listed words when possible; if a chart or practice section cannot be filled, it refuses to start and explains why.
+- **Strict mode OFF:** the game uses a listed word of the requested length whenever one exists. Otherwise, Lexicon generates a combination of alphabet characters of that length, without splitting the phrase.
+- Change strict mode in the mod window. The setting persists across launches. A file containing only an alphabet works with strict mode OFF.
 - A file with a mistake shows up in red in the mod window with the reason. If your chosen dictionary is missing or broken, the song list won't start a song until you choose another.
 
 ## Project layout and tests
